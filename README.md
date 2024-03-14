@@ -1,1 +1,3 @@
 # ITAcademyDell
+
+pip install customtkinter
