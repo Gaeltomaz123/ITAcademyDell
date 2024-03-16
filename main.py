@@ -1,10 +1,10 @@
-from database import db, User, Bet, Rounds, Draw_Price, Draw_Price_Winners_Relationship
+from database import db, User, Bet, Rounds, Draw_Prize, Draw_Prize_Winners_Relationship
 from window import App
 
 
 db.connect()
 
-db.create_tables([User, Bet, Rounds, Draw_Price, Draw_Price_Winners_Relationship])
+db.create_tables([User, Bet, Rounds, Draw_Prize, Draw_Prize_Winners_Relationship])
 
 app = App()
 app.mainloop()
