@@ -1,21 +1,25 @@
 from database import db, User, Bet, Rounds, Draw_Price, Draw_Price_Winners_Relationship
+from window import App
 
 
 db.connect()
 
 db.create_tables([User, Bet, Rounds, Draw_Price, Draw_Price_Winners_Relationship])
 
+app = App()
+app.mainloop()
+
 #user2 = User.create(name="Jose", cpf="321312312", wins=0)
 #draw_price1 = Draw_Price.create(rounds=0, first = 10, second = 34, third = 42, fourth = 29, fifth= 50)
-draw_price1= Draw_Price.get(Draw_Price.id==1)
+#draw_price1= Draw_Price.get(Draw_Price.id==1)
 #round1 = Rounds.create(round_number=0, draw_price=draw_price1, has_winner=True)
 #round2 = Rounds.create(round_number=24, draw_price=draw_price1, has_winner=True)
-user1 = User.get(User.id==1)
-user2 = User.get(User.id==2)
-round2 = Rounds.get(Rounds.id==2)
+#user1 = User.get(User.id==1)
+#user2 = User.get(User.id==2)
+#round2 = Rounds.get(Rounds.id==2)
 #bet2 = Bet.create(user=user2, draw_price=draw_price1, round_number=round2.round_number, first = 5, second = 2, third = 12, fourth = 30, fifth= 50)
-print(round2)
-winner = Draw_Price_Winners_Relationship.create(draw_price=draw_price1, user=user2)
+#print(round2)
+#winner = Draw_Price_Winners_Relationship.create(draw_price=draw_price1, user=user2)
 
 
 

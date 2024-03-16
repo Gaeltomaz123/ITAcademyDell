@@ -1,27 +1,29 @@
-from customtkinter import *
+import customtkinter
 
 # Setting themes
-set_appearance_mode("white")
-set_default_color_theme("green") 
+customtkinter.set_appearance_mode("white")
+customtkinter.set_default_color_theme("green") 
 
-# Creating window
-app = CTk()
-app.title("TheLuckyGame")
-app.geometry("1000x600")
-app.iconbitmap("images/clover.ico")
-app.resizable(width=False, height=False)
+class App(customtkinter.CTk):
+    def __init__(self):
+        super().__init__()
 
-count = 0
+        self.count = 0
 
-def test():
-    global count
-    count += 1
-    label.configure(text=f"Clicks: {count}")
+        # Creating window
+        self.title("TheLuckyGame")
+        self.geometry("1000x600")
+        self.iconbitmap("images/clover.ico")
+        self.resizable(width=False, height=False)
 
-# Objects inside app
-label = CTkLabel(app, text="Clicks: 0")
-button = CTkButton(app, corner_radius=32, command=test)
-label.pack(anchor="s", expand=True, pady=10)
-button.pack(anchor="n", expand=True)
+        # Objects inside app
+        self.label = customtkinter.CTkLabel(self, text="Clicks: 0")
+        self.button = customtkinter.CTkButton(self, corner_radius=32, command=self.test)
+        self.label.pack(anchor="s", expand=True, pady=10)
+        self.button.pack(anchor="n", expand=True)
 
-app.mainloop()
+    def test(self):
+        self.count += 1
+        self.label.configure(text=f"Clicks: {self.count}")
+
+
