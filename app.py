@@ -1,7 +1,6 @@
 from database import User, Bet, Rounds, Draw_Prize, Draw_Prize_Winners_Relationship
 from CTkTable import CTkTable
 import customtkinter
-from PIL import Image
 
 customtkinter.set_appearance_mode("dark")
 
