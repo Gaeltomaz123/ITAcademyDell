@@ -6,6 +6,8 @@ db.connect()
 
 db.create_tables([User, Bet, Rounds, Draw_Prize, Draw_Prize_Winners_Relationship])
 
+#Draw_Prize.create(rounds=0, first = 10, second = 34, third = 42, fourth = 29, fifth= 50)
+
 app = App()
 app.mainloop()
 

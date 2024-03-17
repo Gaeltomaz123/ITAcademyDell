@@ -1,3 +1,5 @@
+from database import User, Bet, Rounds, Draw_Prize, Draw_Prize_Winners_Relationship
+from CTkTable import CTkTable
 import customtkinter
 from PIL import Image
 
@@ -20,7 +22,8 @@ class App(customtkinter.CTk):
         
         # Fonts
         self.font_left = customtkinter.CTkFont(family="Arial", size=15, weight="bold")
-        self.font_titles = customtkinter.CTkFont(family="Arial", size=50, weight="bold")
+        self.font_titles = customtkinter.CTkFont(family="Arial", size=35, weight="bold")
+        self.font_sub = customtkinter.CTkFont(family="Arial", size=15, weight="bold")
         
         # Left Frame
         self.left_frame = customtkinter.CTkFrame(self, fg_color="#2dc83f",  width=300, height=600, corner_radius=0)
@@ -69,23 +72,68 @@ class App(customtkinter.CTk):
         self.prize = customtkinter.CTkButton(self.left_frame, command = lambda: self.selected(self.prize, frame_prize), image=self.prize_img, text="Premiação", fg_color="transparent", font=self.font_left, hover_color="#26a635", anchor="w")
         self.prize.pack(anchor="sw", ipady=5, pady=(10, 0), padx=(15, 0))
 
-         # Frames
+        # Frames
 
         self.right_frames = customtkinter.CTkFrame(self, fg_color="#fff",  width=700, height=600, corner_radius=0)
         self.right_frames.pack_propagate(0)
         self.right_frames.pack(side="left")
 
         # Frame - Iniciar
-        
         def frame_start(self):
             self.frame_start = customtkinter.CTkFrame(self.right_frames, fg_color="#fff",  width=700, height=600, corner_radius=0)
             self.frame_start.pack_propagate(0)
             self.frame_start.pack(side="left")
 
-            self.title_start = customtkinter.CTkFrame(master=self.frame_start, fg_color="transparent")
+            self.title_start = customtkinter.CTkFrame(self.frame_start, fg_color="transparent")
             self.title_start.pack(anchor="n", fill="x",  padx=27, pady=(29, 0))
 
-            customtkinter.CTkLabel(self.title_start, text="Iniciar", font=self.font_titles, text_color="#2A8C55").pack(anchor="nw", side="left")
+            customtkinter.CTkLabel(self.title_start, text="Iniciar", font=self.font_titles, text_color="#2dc83f").pack(anchor="nw", side="left")
+
+            self.number_draw_prize = customtkinter.CTkFrame(self.frame_start, fg_color="#2dc83f", width=160, height=80)
+            self.number_draw_prize.propagate(0)
+            self.number_draw_prize.pack(anchor="nw",  padx=27, pady=(35, 0))
+            self.s_draw_img_data = Image.open("images/sorteio.png")
+            self.s_draw_prize_img = customtkinter.CTkImage(dark_image=self.s_draw_img_data, light_image=self.s_draw_img_data, size=(50, 50))
+            customtkinter.CTkLabel(self.number_draw_prize, text="", image=self.s_draw_prize_img).pack(anchor="center", side="left", padx=(15, 5))
+            self.draw_price_number = Draw_Prize.select().count()
+            customtkinter.CTkLabel(self.number_draw_prize, text=f"Sorteio \nnº: {self.draw_price_number}", font=self.font_sub, text_color="white").pack(anchor="center", side="left")
+
+
+            # Table 
+            table_data = [
+                ["Número do Sorteio", "Rodadas", "Numeros Sorteados", "Vencedores"],
+                ['3833', 'Smartphone', 'Alice', '123 Main St', 'Confirmed', '8'],
+                ['6432', 'Laptop', 'Bob', '456 Elm St', 'Packing', '5'],
+                ['2180', 'Tablet', 'Crystal', '789 Oak St', 'Delivered', '1'],
+                ['5438', 'Headphones', 'John', '101 Pine St', 'Confirmed', '9'],
+                ['9144', 'Camera', 'David', '202 Cedar St', 'Processing', '2'],
+                ['7689', 'Printer', 'Alice', '303 Maple St', 'Cancelled', '2'],
+                ['1323', 'Smartwatch', 'Crystal', '404 Birch St', 'Shipping', '6'],
+                ['7391', 'Keyboard', 'John', '505 Redwood St', 'Cancelled', '10'],
+                ['4915', 'Monitor', 'Alice', '606 Fir St', 'Shipping', '6'],
+                ['5548', 'External Hard Drive', 'David', '707 Oak St', 'Delivered', '10'],
+                ['5485', 'Table Lamp', 'Crystal', '808 Pine St', 'Confirmed', '4'],
+                ['7764', 'Desk Chair', 'Bob', '909 Cedar St', 'Processing', '9'],
+                ['8252', 'Coffee Maker', 'John', '1010 Elm St', 'Confirmed', '6'],
+                ['2377', 'Blender', 'David', '1111 Redwood St', 'Shipping', '2'],
+                ['5287', 'Toaster', 'Alice', '1212 Maple St', 'Processing', '1'],
+                ['7739', 'Microwave', 'Crystal', '1313 Cedar St', 'Confirmed', '8'],
+                ['3129', 'Refrigerator', 'John', '1414 Oak St', 'Processing', '5'],
+                ['4789', 'Vacuum Cleaner', 'Bob', '1515 Pine St', 'Cancelled', '10']
+            ]
+
+           
+
+            table_frame = customtkinter.CTkScrollableFrame(self.frame_start, fg_color="transparent", width=600)
+            table_frame.pack(expand=True, padx=22, pady=(29, 0), anchor="nw")
+            table = CTkTable(master=table_frame, values=table_data, colors=["#E6E6E6", "#EEEEEE"], header_color="#2dc83f", hover_color="#B4B4B4")
+            table.edit_row(0, text_color="#fff", hover_color="#26a635")
+            table.pack(expand=True, anchor="nw")
+
+
+            #print(User.get_by_id(User.id == 1).cpf)
+
+            
 
         # Frame - Registrar nova aposta
         def frame_register(self):
@@ -93,10 +141,10 @@ class App(customtkinter.CTk):
             self.frame_register.pack_propagate(0)
             self.frame_register.pack(side="left")
 
-            self.title_register = customtkinter.CTkFrame(master=self.frame_register, fg_color="transparent")
+            self.title_register = customtkinter.CTkFrame(self.frame_register, fg_color="transparent")
             self.title_register.pack(anchor="n", fill="x",  padx=27, pady=(29, 0))
 
-            customtkinter.CTkLabel(self.title_register, text="Registrar nova aposta", font=self.font_titles, text_color="#2A8C55").pack(anchor="nw", side="left")
+            customtkinter.CTkLabel(self.title_register, text="Registrar nova aposta", font=self.font_titles, text_color="#2dc83f").pack(anchor="nw", side="left")
 
         # Frame - Listas apostas
         def frame_list(self):
@@ -104,10 +152,10 @@ class App(customtkinter.CTk):
             self.frame_list.pack_propagate(0)
             self.frame_list.pack(side="left")
 
-            self.title_list = customtkinter.CTkFrame(master=self.frame_list, fg_color="transparent")
+            self.title_list = customtkinter.CTkFrame(self.frame_list, fg_color="transparent")
             self.title_list.pack(anchor="n", fill="x",  padx=27, pady=(29, 0))
 
-            customtkinter.CTkLabel(self.title_list, text="Listas apostas", font=self.font_titles, text_color="#2A8C55").pack(anchor="nw", side="left")
+            customtkinter.CTkLabel(self.title_list, text="Listas apostas", font=self.font_titles, text_color="#2dc83f").pack(anchor="nw", side="left")
 
         # Frame - Finalizar apostas e executar sorteio
         def frame_draw_prize(self):
@@ -115,10 +163,10 @@ class App(customtkinter.CTk):
             self.frame_draw_prize.pack_propagate(0)
             self.frame_draw_prize.pack(side="left")
 
-            self.title_draw_prize = customtkinter.CTkFrame(master=self.frame_draw_prize, fg_color="transparent")
+            self.title_draw_prize = customtkinter.CTkFrame(self.frame_draw_prize, fg_color="transparent")
             self.title_draw_prize.pack(anchor="n", fill="x",  padx=27, pady=(29, 0))
 
-            customtkinter.CTkLabel(self.title_draw_prize, text="Finalizar apostas", font=self.font_titles, text_color="#2A8C55").pack(anchor="nw", side="left")
+            customtkinter.CTkLabel(self.title_draw_prize, text="Finalizar apostas", font=self.font_titles, text_color="#2dc83f").pack(anchor="nw", side="left")
 
         # Frame - Fim da apuração
         def frame_end(self):
@@ -126,10 +174,10 @@ class App(customtkinter.CTk):
             self.frame_end.pack_propagate(0)
             self.frame_end.pack(side="left")
 
-            self.title_end = customtkinter.CTkFrame(master=self.frame_end, fg_color="transparent")
+            self.title_end = customtkinter.CTkFrame(self.frame_end, fg_color="transparent")
             self.title_end.pack(anchor="n", fill="x",  padx=27, pady=(29, 0))
 
-            customtkinter.CTkLabel(self.title_end, text="Fim da apuração", font=self.font_titles, text_color="#2A8C55").pack(anchor="nw", side="left")
+            customtkinter.CTkLabel(self.title_end, text="Fim da apuração", font=self.font_titles, text_color="#2dc83f").pack(anchor="nw", side="left")
 
         # Frame - Premiação
         def frame_prize(self):
@@ -137,10 +185,10 @@ class App(customtkinter.CTk):
             self.frame_prize.pack_propagate(0)
             self.frame_prize.pack(side="left")
 
-            self.title_prize = customtkinter.CTkFrame(master=self.frame_prize, fg_color="transparent")
+            self.title_prize = customtkinter.CTkFrame(self.frame_prize, fg_color="transparent")
             self.title_prize.pack(anchor="n", fill="x",  padx=27, pady=(29, 0))
 
-            customtkinter.CTkLabel(self.title_prize, text="Premiação", font=self.font_titles, text_color="#2A8C55").pack(anchor="nw", side="left")
+            customtkinter.CTkLabel(self.title_prize, text="Premiação", font=self.font_titles, text_color="#2dc83f").pack(anchor="nw", side="left")
 
         frame_start(self)
 
