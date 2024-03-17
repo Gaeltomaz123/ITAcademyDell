@@ -100,8 +100,8 @@ class App(customtkinter.CTk):
             customtkinter.CTkLabel(self.number_draw_prize, text=f"Sorteio \nnº: {self.draw_price_number}", font=self.font_sub, text_color="white").pack(anchor="center", side="left")
 
             # Table 
-            table_data = [
-                ["Número do Sorteio", "Rodadas", "Numeros Sorteados", "Vencedores"]
+            self.table_data = [
+                ["Número do Sorteio", "Rodadas", "Numeros Sorteados", "Finalizado", "Vencedores"]
             ]
 
             for i in Draw_Prize.select():
@@ -109,21 +109,25 @@ class App(customtkinter.CTk):
                 numbers = [i.first, i.second, i.third, i.fourth, i.fifth]
                 for j in Draw_Prize_Winners_Relationship.select():
                     if i.id == j.draw_prize.id:
-                       winners.append(f"{j.user.name}")
-                data = [i.id, i.rounds, numbers, winners]
-                table_data.append(data)
-            table_frame = customtkinter.CTkScrollableFrame(self.frame_start, fg_color="transparent", width=600)
-            table_frame.pack(expand=True, padx=22, pady=(29, 0), anchor="nw")
-            table = CTkTable(master=table_frame, values=table_data, colors=["#E6E6E6", "#EEEEEE"], header_color="#2dc83f", hover_color="#B4B4B4", font=self.font_table)
-            table.edit_row(0, text_color="#fff", hover_color="#26a635")
-            table.pack(expand=True, anchor="nw")
+                       winners.append(f"[{j.user.name}]")
+                winners.sort()
+                finished = ""
+                if i.finished == True:
+                    finished = "Sim"
+                else:
+                    finished = "Não"
+                    winners = "-"
+                    numbers = "-"
+                data = [i.id, i.rounds, numbers, finished, winners]
+                self.table_data.append(data)
+            self.table_frame = customtkinter.CTkScrollableFrame(self.frame_start, fg_color="transparent", width=650)
+            self.table_frame.pack(padx=22, pady=(29, 0), anchor="nw")
+            self.table = CTkTable(self.table_frame, values=self.table_data, colors=["#E6E6E6", "#EEEEEE"], header_color="#2dc83f", hover_color="#B4B4B4", font=self.font_table)
+            self.table.edit_row(0, text_color="#fff", hover_color="#26a635")
+            self.table.pack(anchor="sw")
 
+            self.new_draw_prize = customtkinter.CTkButton(self.frame_start, text="+ Novo Sorteio", command=self.new_draw_prize,  font=self.font_sub, text_color="#fff", fg_color="#2dc83f", hover_color="#26a635", width=400, height=50).pack(anchor="center", pady=(50,0), padx=(0, 60))
 
-
-
-            #print(User.get_by_id(User.id == 1).cpf)
-
-            
 
         # Frame - Registrar nova aposta
         def frame_register(self):
@@ -183,6 +187,7 @@ class App(customtkinter.CTk):
         frame_start(self)
 
 
+
     def diselected(self):
         self.start.configure(fg_color="transparent")
         self.register.configure(fg_color="transparent")
@@ -198,4 +203,7 @@ class App(customtkinter.CTk):
         self.diselected()
         but.configure(fg_color="#26a635")
         frame(self)
+
+    def new_draw_prize(self):
+            Draw_Prize.create()
 

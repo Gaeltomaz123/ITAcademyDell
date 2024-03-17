@@ -11,12 +11,13 @@ class User(Model):
         database = db
 
 class Draw_Prize(Model):
-    rounds = IntegerField()
-    first = IntegerField()
-    second = IntegerField()
-    third = IntegerField()
-    fourth = IntegerField()
-    fifth = IntegerField()
+    rounds = IntegerField(default=0)
+    first = IntegerField(null=True)
+    second = IntegerField(null=True)
+    third = IntegerField(null=True)
+    fourth = IntegerField(null=True)
+    fifth = IntegerField(null=True)
+    finished = BooleanField(default=False)
     class Meta:
         database = db
 
