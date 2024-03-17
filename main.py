@@ -8,6 +8,14 @@ db.create_tables([User, Bet, Rounds, Draw_Prize, Draw_Prize_Winners_Relationship
 
 #Draw_Prize.create(rounds=0, first = 10, second = 34, third = 42, fourth = 29, fifth= 50)
 
+draw_prize = Draw_Prize.get(Draw_Prize.id == 1)
+user = User.get(User.id==1)
+
+#User.create(name="Gabriel", cpf="02648422005", wins="0")
+user1 = User.get(User.id==2)
+
+#Draw_Prize_Winners_Relationship.create(draw_prize_id=draw_prize, user_id=user1)
+
 app = App()
 app.mainloop()
 

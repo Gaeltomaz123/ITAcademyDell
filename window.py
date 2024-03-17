@@ -24,6 +24,7 @@ class App(customtkinter.CTk):
         self.font_left = customtkinter.CTkFont(family="Arial", size=15, weight="bold")
         self.font_titles = customtkinter.CTkFont(family="Arial", size=35, weight="bold")
         self.font_sub = customtkinter.CTkFont(family="Arial", size=15, weight="bold")
+        self.font_table = customtkinter.CTkFont(family="Arial", size=10)
         
         # Left Frame
         self.left_frame = customtkinter.CTkFrame(self, fg_color="#2dc83f",  width=300, height=600, corner_radius=0)
@@ -98,37 +99,26 @@ class App(customtkinter.CTk):
             self.draw_price_number = Draw_Prize.select().count()
             customtkinter.CTkLabel(self.number_draw_prize, text=f"Sorteio \nnº: {self.draw_price_number}", font=self.font_sub, text_color="white").pack(anchor="center", side="left")
 
-
             # Table 
             table_data = [
-                ["Número do Sorteio", "Rodadas", "Numeros Sorteados", "Vencedores"],
-                ['3833', 'Smartphone', 'Alice', '123 Main St', 'Confirmed', '8'],
-                ['6432', 'Laptop', 'Bob', '456 Elm St', 'Packing', '5'],
-                ['2180', 'Tablet', 'Crystal', '789 Oak St', 'Delivered', '1'],
-                ['5438', 'Headphones', 'John', '101 Pine St', 'Confirmed', '9'],
-                ['9144', 'Camera', 'David', '202 Cedar St', 'Processing', '2'],
-                ['7689', 'Printer', 'Alice', '303 Maple St', 'Cancelled', '2'],
-                ['1323', 'Smartwatch', 'Crystal', '404 Birch St', 'Shipping', '6'],
-                ['7391', 'Keyboard', 'John', '505 Redwood St', 'Cancelled', '10'],
-                ['4915', 'Monitor', 'Alice', '606 Fir St', 'Shipping', '6'],
-                ['5548', 'External Hard Drive', 'David', '707 Oak St', 'Delivered', '10'],
-                ['5485', 'Table Lamp', 'Crystal', '808 Pine St', 'Confirmed', '4'],
-                ['7764', 'Desk Chair', 'Bob', '909 Cedar St', 'Processing', '9'],
-                ['8252', 'Coffee Maker', 'John', '1010 Elm St', 'Confirmed', '6'],
-                ['2377', 'Blender', 'David', '1111 Redwood St', 'Shipping', '2'],
-                ['5287', 'Toaster', 'Alice', '1212 Maple St', 'Processing', '1'],
-                ['7739', 'Microwave', 'Crystal', '1313 Cedar St', 'Confirmed', '8'],
-                ['3129', 'Refrigerator', 'John', '1414 Oak St', 'Processing', '5'],
-                ['4789', 'Vacuum Cleaner', 'Bob', '1515 Pine St', 'Cancelled', '10']
+                ["Número do Sorteio", "Rodadas", "Numeros Sorteados", "Vencedores"]
             ]
 
-           
-
+            for i in Draw_Prize.select():
+                winners = []
+                numbers = [i.first, i.second, i.third, i.fourth, i.fifth]
+                for j in Draw_Prize_Winners_Relationship.select():
+                    if i.id == j.draw_prize.id:
+                       winners.append(f"{j.user.name}")
+                data = [i.id, i.rounds, numbers, winners]
+                table_data.append(data)
             table_frame = customtkinter.CTkScrollableFrame(self.frame_start, fg_color="transparent", width=600)
             table_frame.pack(expand=True, padx=22, pady=(29, 0), anchor="nw")
-            table = CTkTable(master=table_frame, values=table_data, colors=["#E6E6E6", "#EEEEEE"], header_color="#2dc83f", hover_color="#B4B4B4")
+            table = CTkTable(master=table_frame, values=table_data, colors=["#E6E6E6", "#EEEEEE"], header_color="#2dc83f", hover_color="#B4B4B4", font=self.font_table)
             table.edit_row(0, text_color="#fff", hover_color="#26a635")
             table.pack(expand=True, anchor="nw")
+
+
 
 
             #print(User.get_by_id(User.id == 1).cpf)
