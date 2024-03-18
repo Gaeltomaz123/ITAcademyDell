@@ -1,5 +1,4 @@
 from database import db, User, Bet, Rounds, Draw_Prize, Draw_Prize_Winners_Relationship
-#from window import App
 from app import App
 
 
