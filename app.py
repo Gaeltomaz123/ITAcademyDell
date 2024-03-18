@@ -65,21 +65,29 @@ class Tab(customtkinter.CTkTabview):
         # Cpf
         self.cpf_input = customtkinter.CTkEntry(master=self.tab(self.titles[1]), placeholder_text="Cpf do Apostador", width=210)
         self.cpf_input.grid(row=2, column=0, padx=20, pady=10, sticky="sw")
-        # Add Button
+        # Add user Button
         self.new_a = customtkinter.CTkButton(master=self.tab(self.titles[1]), text="+ Adicionar Apostador", command=self.new_user)
         self.new_a.grid(row=3, column=0, padx=20, pady=10, sticky="sw")
+        # Remove user Button
+        self.remove_a = customtkinter.CTkButton(master=self.tab(self.titles[1]), text="- Remover Apostador (Sò precisa informar cpf)", command=self.remove_user)
+        self.remove_a.grid(row=4, column=0, padx=20, pady=10, sticky="sw")
         # Combo box
         self.user_values = []
-        self.state_choices = customtkinter.NORMAL
+        self.state_choices = "readonly"
         for i in User.select():
             self.user_values.append(f"{i.name}, {i.cpf}")
         if not self.user_values:
-            self.state_choices = customtkinter.DISABLED
+            self.state_choices = "disabled"
         self.choices = customtkinter.CTkComboBox(master=self.tab(self.titles[1]), values=self.user_values, state=self.state_choices, width=230)
         self.choices.grid(row=1, column=1, padx=20, pady=10, sticky="sw")
-        # Bet
+        if User.select().count() != 0:
+            self.last_user = User.get_by_id(User.select().count())
+            self.choices.set(f"{self.last_user.name}, {self.last_user.cpf}")
+        # Bet Numbers
+        self.number_text = customtkinter.CTkLabel(master=self.tab(self.titles[1]), text="Digite os 5 números (sobre os números de 1 a 50)")
+        self.number_text.grid(row=2, column=1, padx=20, pady=10, sticky="sw")
         self.number_fields = customtkinter.CTkFrame(master=self.tab(self.titles[1]))
-        self.number_fields.grid(row=2, column=1, padx=20, pady=10, sticky="sw")
+        self.number_fields.grid(row=3, column=1, padx=20, pady=10, sticky="sw")
         self.n1 = customtkinter.CTkEntry(master=self.number_fields, placeholder_text="Num1", width=50)
         self.n1.grid(row=1, column=0, sticky="sw")
         self.n2 = customtkinter.CTkEntry(master=self.number_fields, placeholder_text="Num2", width=50)
@@ -91,7 +99,7 @@ class Tab(customtkinter.CTkTabview):
         self.n5 = customtkinter.CTkEntry(master=self.number_fields, placeholder_text="Num5", width=50)
         self.n5.grid(row=1, column=4, sticky="sw")
         self.add_bet = customtkinter.CTkButton(master=self.tab(self.titles[1]), text="+ Adicionar Aposta")
-        self.add_bet.grid(row=3, column=1, padx=20, pady=10, sticky="sw")
+        self.add_bet.grid(row=4, column=1, padx=20, pady=10, sticky="sw")
 
 
         # Lista apostas tab
@@ -147,23 +155,65 @@ class Tab(customtkinter.CTkTabview):
     def new_draw_prize(self):
         Draw_Prize.create()
         self.draw_prize_number.configure(text=f"Sorteio nº: {Draw_Prize.select().count()}")
-        self.new_d.configure(state=customtkinter.DISABLED)
+        self.new_d.configure(state="disabled")
         CTkMessagebox(title="Sucesso", icon="check", message="Sorteio criado com sucesso!\n\nOBS: Você só poderá criar outro sorteio após a finalização do sorteio atual.")
 
-    def new_user(self):
-        if self.name_input.get().isnumeric():
-            CTkMessagebox(title="Erro", message="O nome deve conter apenas letras!!!", icon="cancel")
+
+    def field_verification(self):
+        if len(self.cpf_input.get()) != 11:
+            CTkMessagebox(title="Erro", message="O cpf deve exatos 11 números!!!", icon="cancel")
         elif not self.cpf_input.get().isnumeric():
             CTkMessagebox(title="Erro", message="O cpf deve conter apenas números!!!", icon="cancel")
-        elif len(self.cpf_input.get()) != 11:
-            CTkMessagebox(title="Erro", message="O cpf deve exatos 11 números!!!", icon="cancel")
         else:
-            User.create(name=self.name_input.get(), cpf=str(self.cpf_input.get()))
-            CTkMessagebox(title="Sucesso", icon="check", message="Apostador criado com sucesso!")
-            self.new_user_values = []
+            return True
+        return False
+    
+    
+    def refresh_combobox(self):
+        self.new_user_values = []
+        for i in User.select():
+            self.new_user_values.append(f"{i.name}, {i.cpf}")
+        self.choices.configure(values=self.new_user_values, state="readonly")
+        self.choices.set(f"{self.name_input.get()}, {self.cpf_input.get()}")
+
+
+    def new_user(self):
+        if self.field_verification():
+            user_cpf_repeated = False
             for i in User.select():
-                self.new_user_values.append(f"{i.name}, {i.cpf}")
-            self.choices.configure(values=self.new_user_values, state=customtkinter.NORMAL)
-            self.choices.set(f"{self.name_input.get()}, {self.cpf_input.get()}")
+                if(self.cpf_input.get() == i.cpf):
+                    user_cpf_repeated = True    
+                    break
+            if user_cpf_repeated:
+                CTkMessagebox(title="Erro", message="Já existe um apostador com este cpf!!!", icon="cancel")
+            elif self.name_input.get().isnumeric():
+                CTkMessagebox(title="Erro", message="O nome deve conter apenas letras!!!", icon="cancel")
+            elif self.name_input.get() == "":
+                CTkMessagebox(title="Erro", message="O nome não pode ser vazio!!!", icon="cancel")
+            else:
+                User.create(name=self.name_input.get(), cpf=str(self.cpf_input.get()))
+                CTkMessagebox(title="Sucesso", icon="check", message="O apostador foi criado com sucesso!")
+                self.refresh_combobox()
+            
+
+    def remove_user(self):
+        if self.field_verification():
+            try: User.get(User.cpf == self.cpf_input.get())
+            except:
+                CTkMessagebox(title="Erro", message="O apostador não foi encontrado!!!", icon="cancel")
+            finally:
+                self.user_deleted = User.get(User.cpf == self.cpf_input.get())
+                User.delete_by_id(self.user_deleted.id)
+                self.refresh_combobox()
+                if User.select().count() == 0:
+                    self.choices.configure(values="")
+                    self.choices.set("")
+                    self.choices.configure(state="disabled")
+                else:
+                    self.before_user_deleted = User.get_by_id(User.select().count())
+                    self.choices.set(f"{self.before_user_deleted.name}, {self.before_user_deleted.cpf}")
+                CTkMessagebox(title="Sucesso", icon="check", message="O apostador foi removido com sucesso!")
+                
+        
     
     
