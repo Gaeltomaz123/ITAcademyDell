@@ -68,11 +68,30 @@ class Tab(customtkinter.CTkTabview):
         # Add Button
         self.new_a = customtkinter.CTkButton(master=self.tab(self.titles[1]), text="+ Adicionar Apostador", command=self.new_user)
         self.new_a.grid(row=3, column=0, padx=20, pady=10, sticky="sw")
-        # List
-        self.a_list = customtkinter.CTkButton(master=self.tab(self.titles[1]), text="+ Adicionar Aposta")
-        self.a_list.grid(row=1, column=1, padx=20, pady=10, sticky="sw")
-
-
+        # Combo box
+        self.user_values = []
+        self.state_choices = customtkinter.NORMAL
+        for i in User.select():
+            self.user_values.append(f"{i.name}, {i.cpf}")
+        if not self.user_values:
+            self.state_choices = customtkinter.DISABLED
+        self.choices = customtkinter.CTkComboBox(master=self.tab(self.titles[1]), values=self.user_values, state=self.state_choices, width=230)
+        self.choices.grid(row=1, column=1, padx=20, pady=10, sticky="sw")
+        # Bet
+        self.number_fields = customtkinter.CTkFrame(master=self.tab(self.titles[1]))
+        self.number_fields.grid(row=2, column=1, padx=20, pady=10, sticky="sw")
+        self.n1 = customtkinter.CTkEntry(master=self.number_fields, placeholder_text="Num1", width=50)
+        self.n1.grid(row=1, column=0, sticky="sw")
+        self.n2 = customtkinter.CTkEntry(master=self.number_fields, placeholder_text="Num2", width=50)
+        self.n2.grid(row=1, column=1, sticky="sw")
+        self.n3 = customtkinter.CTkEntry(master=self.number_fields, placeholder_text="Num3", width=50)
+        self.n3.grid(row=1, column=2, sticky="sw")
+        self.n4 = customtkinter.CTkEntry(master=self.number_fields, placeholder_text="Num4", width=50)
+        self.n4.grid(row=1, column=3, sticky="sw")
+        self.n5 = customtkinter.CTkEntry(master=self.number_fields, placeholder_text="Num5", width=50)
+        self.n5.grid(row=1, column=4, sticky="sw")
+        self.add_bet = customtkinter.CTkButton(master=self.tab(self.titles[1]), text="+ Adicionar Aposta")
+        self.add_bet.grid(row=3, column=1, padx=20, pady=10, sticky="sw")
 
 
         # Lista apostas tab
@@ -141,5 +160,10 @@ class Tab(customtkinter.CTkTabview):
         else:
             User.create(name=self.name_input.get(), cpf=str(self.cpf_input.get()))
             CTkMessagebox(title="Sucesso", icon="check", message="Apostador criado com sucesso!")
+            self.new_user_values = []
+            for i in User.select():
+                self.new_user_values.append(f"{i.name}, {i.cpf}")
+            self.choices.configure(values=self.new_user_values, state=customtkinter.NORMAL)
+            self.choices.set(f"{self.name_input.get()}, {self.cpf_input.get()}")
     
     
