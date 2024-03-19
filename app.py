@@ -116,7 +116,13 @@ class Tab(customtkinter.CTkTabview):
         self.table.pack()  
       
         # Finalizar apostas e executar o sorteio tab
-        
+        self.final_text = customtkinter.CTkLabel(master=self.tab(self.titles[3]), font=self.font_sub, text=f"Deseja finalizar as apostas e iniciar o Sorteio nº{self.draw_price_number_data}?")
+        self.final_text.grid(row=1, column=0, padx=20, pady=10, sticky="sw")
+        self.final_but = customtkinter.CTkButton(master=self.tab(self.titles[3]), text="Executar Sorteio", command=self.start_draw_prize)
+        self.final_but.grid(row=2, column=0, padx=20, pady=10, sticky="sw")
+        self.final_obs = customtkinter.CTkLabel(master=self.tab(self.titles[3]), text=f"OBS: Após executar o sorteio voçê não poderá mais criar apostas no mesmo")
+        self.final_obs.grid(row=3, column=0, padx=20, pady=10, sticky="sw")
+
         # Fim da apuração tab
         
         # Premiação
@@ -233,13 +239,19 @@ class Tab(customtkinter.CTkTabview):
         elif not self.n1.get().isnumeric() or not self.n2.get().isnumeric() or not self.n3.get().isnumeric() or not self.n4.get().isnumeric() or not self.n5.get().isnumeric():
             CTkMessagebox(title="Erro", message="Digite apenas números!!!", icon="cancel")
         elif not 1 <= int(self.n1.get()) <= 50 or not 1 <= int(self.n2.get()) <= 50 or not 1 <= int(self.n3.get()) <= 50 or not 1 <= int(self.n4.get()) <= 50 or not 1 <= int(self.n5.get()) <= 50:
-            CTkMessagebox(title="Erro", message="Todos os números devem estar sobre 1 e 50", icon="cancel")
+            CTkMessagebox(title="Erro", message="Todos os números devem estar sobre 1 e 50!!!", icon="cancel")
+        elif self.choices.get() == "":
+            CTkMessagebox(title="Erro", message="Você deve selecionar um apostar!!!", icon="cancel")
         else:
             self.user_info = self.choices.get()
             self.user_cpf = self.user_info[len(self.user_info) - 11 : len(self.user_info)]
             Bet.create(user=User.get(User.cpf == self.user_cpf), draw_prize=Draw_Prize.get_by_id(Draw_Prize.select().count()), register_number=1000+Bet.select().count()+1, first=int(self.n1.get()), second=int(self.n2.get()), third=int(self.n3.get()), fourth=int(self.n4.get()), fifth=int(self.n5.get()))
             self.refresh_bet_table()
             CTkMessagebox(title="Sucesso", icon="check", message="A aposta foi criada com sucesso!")
+
+    def start_draw_prize(self):
+        pass
+
                 
         
     
