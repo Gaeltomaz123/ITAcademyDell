@@ -12,20 +12,9 @@ class User(Model):
 
 class Draw_Prize(Model):
     rounds = IntegerField(default=0)
-    first = IntegerField(null=True)
-    second = IntegerField(null=True)
-    third = IntegerField(null=True)
-    fourth = IntegerField(null=True)
-    fifth = IntegerField(null=True)
+    numbers = CharField(default= "-", null=True)
     finished = BooleanField(default=False)
-    class Meta:
-        database = db
-
-class Rounds(Model):
-    round_number = IntegerField()
-    draw_prize = ForeignKeyField(Draw_Prize, backref="draw_prize")
     has_winner = BooleanField(default=False)
-
     class Meta:
         database = db
 
