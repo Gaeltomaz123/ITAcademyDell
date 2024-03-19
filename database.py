@@ -3,8 +3,8 @@ from peewee import *
 db = SqliteDatabase("theluckygame.db")   
 
 class User(Model):
-    name = CharField()
-    cpf = CharField(unique=True)
+    name = CharField(null=False)
+    cpf = CharField(unique=True, null=False)
     wins = IntegerField(default=0)
 
     class Meta:
@@ -32,12 +32,12 @@ class Rounds(Model):
 class Bet(Model):
     user = ForeignKeyField(User, backref="users")
     draw_prize = ForeignKeyField(Draw_Prize, backref="draw_prize")
-    register_number = IntegerField()
-    first = IntegerField()
-    second = IntegerField()
-    third = IntegerField()
-    fourth = IntegerField()
-    fifth = IntegerField()
+    register_number = IntegerField(null=False)
+    first = IntegerField(null=False)
+    second = IntegerField(null=False)
+    third = IntegerField(null=False)
+    fourth = IntegerField(null=False)
+    fifth = IntegerField(null=False)
 
     class Meta:
         database = db

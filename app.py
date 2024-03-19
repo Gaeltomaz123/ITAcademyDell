@@ -98,7 +98,7 @@ class Tab(customtkinter.CTkTabview):
         self.n4.grid(row=1, column=3, sticky="sw")
         self.n5 = customtkinter.CTkEntry(master=self.number_fields, placeholder_text="Num5", width=50)
         self.n5.grid(row=1, column=4, sticky="sw")
-        self.add_bet = customtkinter.CTkButton(master=self.tab(self.titles[1]), text="+ Adicionar Aposta")
+        self.add_bet = customtkinter.CTkButton(master=self.tab(self.titles[1]), text="+ Adicionar Aposta", command=self.add_bet)
         self.add_bet.grid(row=4, column=1, padx=20, pady=10, sticky="sw")
 
 
@@ -128,8 +128,7 @@ class Tab(customtkinter.CTkTabview):
         self.window.resizable(width=False, height=False)
         self.table_data = [
                 ["Número do Sorteio", "Rodadas", "Numeros Sorteados", "Finalizado", "Vencedores"]
-            ]
-
+        ]
         for i in Draw_Prize.select():
             winners = []
             numbers = [i.first, i.second, i.third, i.fourth, i.fifth]
@@ -175,6 +174,21 @@ class Tab(customtkinter.CTkTabview):
             self.new_user_values.append(f"{i.name}, {i.cpf}")
         self.choices.configure(values=self.new_user_values, state="readonly")
         self.choices.set(f"{self.name_input.get()}, {self.cpf_input.get()}")
+        
+
+    def refresh_bet_table(self):
+        self.new_table_data = [
+                ["Numero do Sorteio", "Nome", "Cpf", "Números"]
+        ]
+        for i in Bet.select():
+            numbers = [i.first, i.second, i.third, i.fourth, i.fifth]
+            data = [i.register_number, i.user.name, i.user.cpf, numbers]
+            self.new_table_data.append(data)
+        self.table.destroy()
+        self.table = CTkTable(master=self.table_frame, values=self.new_table_data)
+        self.table.pack()  
+
+
 
 
     def new_user(self):
@@ -213,6 +227,21 @@ class Tab(customtkinter.CTkTabview):
                     self.before_user_deleted = User.get_by_id(User.select().count())
                     self.choices.set(f"{self.before_user_deleted.name}, {self.before_user_deleted.cpf}")
                 CTkMessagebox(title="Sucesso", icon="check", message="O apostador foi removido com sucesso!")
+
+    
+    def add_bet(self):
+        if self.n1.get() == "" or self.n2.get() == "" or self.n3.get() == "" or self.n4.get() == "" or self.n5.get() == "":
+            CTkMessagebox(title="Erro", message="Digite todos os valores!!!", icon="cancel")
+        elif not self.n1.get().isnumeric() or not self.n2.get().isnumeric() or not self.n3.get().isnumeric() or not self.n4.get().isnumeric() or not self.n5.get().isnumeric():
+            CTkMessagebox(title="Erro", message="Digite apenas números!!!", icon="cancel")
+        elif not 1 <= int(self.n1.get()) <= 50 or not 1 <= int(self.n2.get()) <= 50 or not 1 <= int(self.n3.get()) <= 50 or not 1 <= int(self.n4.get()) <= 50 or not 1 <= int(self.n5.get()) <= 50:
+            CTkMessagebox(title="Erro", message="Todos os números devem estar sobre 1 e 50", icon="cancel")
+        else:
+            self.user_info = self.choices.get()
+            self.user_cpf = self.user_info[len(self.user_info) - 11 : len(self.user_info)]
+            Bet.create(user=User.get(User.cpf == self.user_cpf), draw_prize=Draw_Prize.get_by_id(Draw_Prize.select().count()), register_number=1000+Bet.select().count()+1, first=int(self.n1.get()), second=int(self.n2.get()), third=int(self.n3.get()), fourth=int(self.n4.get()), fifth=int(self.n5.get()))
+            self.refresh_bet_table()
+            CTkMessagebox(title="Sucesso", icon="check", message="A aposta foi criada com sucesso!")
                 
         
     
