@@ -80,9 +80,7 @@ class Tab(customtkinter.CTkTabview):
             self.state_choices = "disabled"
         self.choices = customtkinter.CTkComboBox(master=self.tab(self.titles[1]), values=self.user_values, state=self.state_choices, width=230)
         self.choices.grid(row=1, column=1, padx=20, pady=10, sticky="sw")
-        if User.select().count() != 0:
-            self.last_user = User.get_by_id(User.select().count())
-            self.choices.set(f"{self.last_user.name}, {self.last_user.cpf}")
+        self.choices.set("")
         # Bet Numbers
         self.number_text = customtkinter.CTkLabel(master=self.tab(self.titles[1]), text="Digite os 5 números (sobre os números de 1 a 50)")
         self.number_text.grid(row=2, column=1, padx=20, pady=10, sticky="sw")
@@ -223,10 +221,10 @@ class Tab(customtkinter.CTkTabview):
                     self.choices.configure(values="")
                     self.choices.set("")
                     self.choices.configure(state="disabled")
-                else:
-                    self.before_user_deleted = User.get_by_id(User.select().count())
-                    self.choices.set(f"{self.before_user_deleted.name}, {self.before_user_deleted.cpf}")
+                self.choices.set("")
                 CTkMessagebox(title="Sucesso", icon="check", message="O apostador foi removido com sucesso!")
+                self.refresh_bet_table()
+
 
     
     def add_bet(self):

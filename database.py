@@ -1,6 +1,6 @@
 from peewee import *
 
-db = SqliteDatabase("theluckygame.db")   
+db = SqliteDatabase("theluckygame.db", pragmas={"foreign_keys": 1})   
 
 class User(Model):
     name = CharField(null=False)
@@ -30,8 +30,8 @@ class Rounds(Model):
         database = db
 
 class Bet(Model):
-    user = ForeignKeyField(User, backref="users")
-    draw_prize = ForeignKeyField(Draw_Prize, backref="draw_prize")
+    user = ForeignKeyField(User, backref="users", on_delete="CASCADE")
+    draw_prize = ForeignKeyField(Draw_Prize, backref="draw_prize", on_delete="CASCADE")
     register_number = IntegerField(null=False)
     first = IntegerField(null=False)
     second = IntegerField(null=False)
