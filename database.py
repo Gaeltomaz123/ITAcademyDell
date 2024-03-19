@@ -34,6 +34,7 @@ class Bet(Model):
 class Draw_Prize_Winners_Relationship(Model):
     draw_prize = ForeignKeyField(Draw_Prize, backref="draw_prize")
     user = ForeignKeyField(User, backref="users")
+    register_number = IntegerField(null=False)
     class Meta:
         database = db
     

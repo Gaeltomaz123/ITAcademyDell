@@ -25,6 +25,8 @@ class Tab(customtkinter.CTkTabview):
         if Draw_Prize.select().count() > 0:
             self.actual_draw_prize = Draw_Prize.get_by_id(Draw_Prize.select().count())
 
+        self.winners = []
+
         # tabs
         self.add("Iniciar")
         self.add("Registrar nova aposta")
@@ -50,16 +52,17 @@ class Tab(customtkinter.CTkTabview):
         self.draw_prize_number_data = Draw_Prize.select().count()
         self.draw_prize_number = customtkinter.CTkLabel(master=self.tab(self.titles[0]), font=self.font_sub, text=f"Sorteio nº: {self.draw_prize_number_data}")
         self.draw_prize_number.grid(row=0, column=1, padx=20, pady=10, sticky="sw")
+        customtkinter.CTkLabel(master=self.tab(self.titles[0]), text="OBS: Você só poderá usar as funções do programa após criar o sorteio").grid(row=1, column=1, padx=20, pady=10, sticky="sw")
         # table button
         self.table_btn = customtkinter.CTkButton(master=self.tab(self.titles[0]), text="Abrir Tabela de Sorteios", command=self.table_window)
-        self.table_btn.grid(row=1, column=1, padx=20, pady=10, sticky="sw")
+        self.table_btn.grid(row=2, column=1, padx=20, pady=10, sticky="sw")
         # new draw prize
         self.state_new_d = customtkinter.NORMAL
         for i in Draw_Prize.select():
             if i.finished == False:
                 self.state_new_d = customtkinter.DISABLED
         self.new_d = customtkinter.CTkButton(master=self.tab(self.titles[0]), text="+ Novo Sorteio", command=self.new_draw_prize, state=self.state_new_d)
-        self.new_d.grid(row=2, column=1, padx=20, pady=10, sticky="sw")
+        self.new_d.grid(row=3, column=1, padx=20, pady=10, sticky="sw")
 
 
         # Registrar nova aposta tab
@@ -118,7 +121,7 @@ class Tab(customtkinter.CTkTabview):
             data = [i.register_number, i.user.name, i.user.cpf, numbers]
             self.table_data.append(data)
 
-        self.table_frame = customtkinter.CTkScrollableFrame(master=self.tab(self.titles[2]), width=600)
+        self.table_frame = customtkinter.CTkScrollableFrame(master=self.tab(self.titles[2]), width=700)
         self.table_frame.grid(row=0, column=0, padx=20, pady=20)
         self.table = CTkTable(master=self.table_frame, values=self.table_data)
         self.table.pack()  
@@ -149,9 +152,14 @@ class Tab(customtkinter.CTkTabview):
         # Fim da apuração tab
         
         # Premiação
+        
 
         # Se não tiver nenhum sorteio criado
         if self.draw_prize_number_data == 0:
+            self.add_bet.configure(state="disabled")
+            self.surprise_bet.configure(state="disabled")
+            self.remove_a.configure(state="disabled")
+            self.new_a.configure(state="disabled")
             self.draw_prize_number.configure(text="Nenhum sorteio criado!")
             self.final_but.configure(state="disabled")
             self.final_text.configure(text="Nenhum sorteio criado!")
@@ -190,7 +198,7 @@ class Tab(customtkinter.CTkTabview):
         CTkMessagebox(title="Sucesso", icon="check", message="Sorteio criado com sucesso!\n\nOBS: Você só poderá criar outro sorteio após a finalização do sorteio atual.")
         self.new_d.configure(state="disabled")
         self.actual_draw_prize = Draw_Prize.get_by_id(Draw_Prize.select().count())
-        self.refresh_texts()
+        self.refresh_things()
 
 
     def field_verification(self):
@@ -283,11 +291,19 @@ class Tab(customtkinter.CTkTabview):
         if self.choices.get() == "":
             CTkMessagebox(title="Erro", message="Você deve selecionar um apostar!!!", icon="cancel")
         else:
-            self.n1_random=random.randint(1, 50)
-            self.n2_random=random.randint(1, 50)
-            self.n3_random=random.randint(1, 50)
-            self.n4_random=random.randint(1, 50)
-            self.n5_random=random.randint(1, 50)
+            # Method to check number repeat
+            numbers_list = []
+            for i in range(1, 51):
+                numbers_list.append(i)
+            self.n1_random=random.choice(numbers_list)
+            numbers_list.remove(self.n1_random)
+            self.n2_random=random.choice(numbers_list)
+            numbers_list.remove(self.n2_random)
+            self.n3_random=random.choice(numbers_list)
+            numbers_list.remove(self.n3_random)
+            self.n4_random=random.choice(numbers_list)
+            numbers_list.remove(self.n4_random)
+            self.n5_random=random.choice(numbers_list)
             self.user_info = self.choices.get()
             self.user_cpf = self.user_info[len(self.user_info) - 11 : len(self.user_info)]
             Bet.create(user=User.get(User.cpf == self.user_cpf), draw_prize=Draw_Prize.get_by_id(Draw_Prize.select().count()), register_number=1000+Bet.select().count()+1, first=self.n1_random, second=self.n2_random, third=self.n3_random, fourth=self.n4_random, fifth=self.n5_random)
@@ -304,31 +320,71 @@ class Tab(customtkinter.CTkTabview):
         if self.exist_bet:
             self.configure(state="disabled")
             self.final_but.configure(state="disabled")
-            self.actual_draw_prize.numbers = f"{random.randint(1, 50)}"
+            numbers_list = []
+            for i in range(1, 51):
+                numbers_list.append(i)
+            first_num = random.choice(numbers_list)
+            self.actual_draw_prize.numbers = f"{first_num}"
+            numbers_list.remove(first_num)
+            self.actual_draw_prize.save()
+            list_numbers = [first_num]
             for i in range(1, 5):
-                self.actual_draw_prize.numbers += f", {random.randint(1, 50)}"
+                num = random.choice(numbers_list)
+                numbers_list.remove(num)
+                self.actual_draw_prize.numbers += f", {num}"
+                list_numbers.append(num)
+                self.actual_draw_prize.save()
+                for j in Bet.select():
+                    if j.first in list_numbers and j.second in list_numbers and j.third in list_numbers and j.fourth in list_numbers and j.fifth in list_numbers:
+                        Draw_Prize_Winners_Relationship.create(user=j.user, draw_prize=j.draw_prize, register_number=j.register_number)
+                        self.actual_draw_prize.has_winner = True
+                        self.actual_draw_prize.save()
             self.actual_draw_prize.rounds += 1
             self.actual_draw_prize.save()
             self.draw_prize_numbers.configure(text=f"Números Sorteados: {self.actual_draw_prize.numbers}")
             self.round.configure(text=f"Rodada: {self.actual_draw_prize.rounds}")
             self.update()
-            time.sleep(1)
-            for i in range(5, 29):
+            time.sleep(0.5)
+            for i in range(1, 25):
+                if self.actual_draw_prize.has_winner:
+                    break
                 time.sleep(0.5)
-                self.actual_draw_prize.numbers += f", {random.randint(1, 50)}"
+                num = random.choice(numbers_list)
+                numbers_list.remove(num)
+                self.actual_draw_prize.numbers += f", {num}"
+                list_numbers.append(num)
                 self.actual_draw_prize.rounds += 1
                 self.actual_draw_prize.save()
                 self.draw_prize_numbers.configure(text=f"Números Sorteados: {self.actual_draw_prize.numbers}")
                 self.round.configure(text=f"Rodada: {self.actual_draw_prize.rounds}")
                 self.update()
+                for j in Bet.select():
+                    if j.first in list_numbers and j.second in list_numbers and j.third in list_numbers and j.fourth in list_numbers and j.fifth in list_numbers:
+                        Draw_Prize_Winners_Relationship.create(user=j.user, draw_prize=j.draw_prize, register_number=j.register_number)
+                        self.actual_draw_prize.has_winner = True
+                        self.actual_draw_prize.save()
+            print(list_numbers)
             time.sleep(1)
-            self.configure(state="normal")
+            self.after_draw_prize()
+            self.set("Fim da apuração")
         else:
             CTkMessagebox(title="Erro", message="Você deve criar ao menos uma aposta!!!", icon="cancel")
     
-    def refresh_texts(self):
+    def refresh_things(self):
+        self.add_bet.configure(state="normal")
+        self.surprise_bet.configure(state="normal")
+        self.remove_a.configure(state="normal")
+        self.new_a.configure(state="normal")
         self.final_text.configure(text=f"Deseja finalizar as apostas e iniciar o Sorteio nº: {self.actual_draw_prize.id}?")
         self.final_but.configure(state="normal")
+
+    def after_draw_prize(self):
+        self.actual_draw_prize.finished = True
+        self.add_bet.configure(state="disabled")
+        self.surprise_bet.configure(state="disabled")
+        self.remove_a.configure(state="disabled")
+        self.new_a.configure(state="disabled")
+    
                 
         
     
