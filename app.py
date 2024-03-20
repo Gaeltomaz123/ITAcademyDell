@@ -150,7 +150,22 @@ class Tab(customtkinter.CTkTabview):
         self.final_obs.grid(row=5, column=0, padx=20, pady=10, sticky="sw")
 
         # Fim da apuração tab
-        
+        if self.actual_draw_prize.id > 0:
+            self.numbers = customtkinter.CTkLabel(master=self.tab(self.titles[4]), font=self.font_sub, text=f"Números sorteados: {self.actual_draw_prize.numbers}")
+            self.numbers.grid(row=1, column=0, padx=20, pady=10, sticky="sw")
+            self.rounds = customtkinter.CTkLabel(master=self.tab(self.titles[4]), font=self.font_sub, text=f"Rodadas: {self.actual_draw_prize.rounds}")
+            self.rounds.grid(row=2, column=0, padx=20, pady=10, sticky="sw")
+            self.winners_array = []
+            for i in Draw_Prize_Winners_Relationship:
+                if i.draw_prize == self.actual_draw_prize:
+                    self.winners_array.append(i.user.name)
+            self.winners_quant = customtkinter.CTkLabel(master=self.tab(self.titles[4]), font=self.font_sub, text=f"Quantidade de vencedores: {len(self.winners_array)}")
+            self.winners_quant.grid(row=3, column=0, padx=20, pady=10, sticky="sw")
+            self.winners_array.sort()
+            if len(self.winners_array) > 0:
+                self.winners_quant = customtkinter.CTkLabel(master=self.tab(self.titles[4]), font=self.font_sub, text=f"Vencedores: {self.winners_array}")
+                self.winners_quant.grid(row=4, column=0, padx=20, pady=10, sticky="sw")
+
         # Premiação
         
 
@@ -163,6 +178,13 @@ class Tab(customtkinter.CTkTabview):
             self.draw_prize_number.configure(text="Nenhum sorteio criado!")
             self.final_but.configure(state="disabled")
             self.final_text.configure(text="Nenhum sorteio criado!")
+        
+        if self.actual_draw_prize.id > 0:
+            if self.actual_draw_prize.finished:
+                self.add_bet.configure(state="disabled")
+                self.surprise_bet.configure(state="disabled")
+                self.remove_a.configure(state="disabled")
+                self.new_a.configure(state="disabled")
 
 
     def table_window(self):
@@ -380,6 +402,7 @@ class Tab(customtkinter.CTkTabview):
 
     def after_draw_prize(self):
         self.actual_draw_prize.finished = True
+        self.actual_draw_prize.save()
         self.add_bet.configure(state="disabled")
         self.surprise_bet.configure(state="disabled")
         self.remove_a.configure(state="disabled")
