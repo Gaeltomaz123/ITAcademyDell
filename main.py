@@ -21,7 +21,7 @@ a.rounds = 0
 a.has_winner = False
 a.save()'''
 
-"Draw_Prize.delete_by_id(2)"
+'''Draw_Prize.delete_by_id(2)'''
 
 app = App()
 app.mainloop()
