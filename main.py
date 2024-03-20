@@ -15,13 +15,7 @@ db.create_tables([User, Bet, Draw_Prize, Draw_Prize_Winners_Relationship])
 #user1 = User.get(User.id==2)
 #Draw_Prize_Winners_Relationship.create(draw_prize_id=draw_prize, user_id=user1)
 
-'''a = Draw_Prize.get_by_id(1)
-a.numbers = "-"
-a.rounds = 0
-a.has_winner = False
-a.save()'''
-
-'''Draw_Prize.delete_by_id(2)'''
+'''Draw_Prize.delete_by_id(1)'''''
 
 app = App()
 app.mainloop()

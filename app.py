@@ -25,9 +25,28 @@ class Tab(customtkinter.CTkTabview):
         if Draw_Prize.select().count() > 0:
             self.actual_draw_prize = Draw_Prize.get_by_id(Draw_Prize.select().count())
 
+        # Global variables
         self.winners = []
 
         self.register_number = 1000 + Bet.select().where(Bet.draw_prize == self.actual_draw_prize).count()
+
+        self.actual_bets = Bet.select().where(Bet.draw_prize == self.actual_draw_prize)
+
+        self.allbets = []
+        for i in self.actual_bets:
+            self.allbets.append(i.first)
+            self.allbets.append(i.second)
+            self.allbets.append(i.third)
+            self.allbets.append(i.fourth)
+            self.allbets.append(i.fifth)
+        self.allbets_without_repeat = list(set(self.allbets))
+        '''first 
+        second 
+        third 
+        fourth 
+        fifth '''
+
+        
 
         for i in Draw_Prize_Winners_Relationship:
             if i.draw_prize == self.actual_draw_prize:
@@ -160,6 +179,10 @@ class Tab(customtkinter.CTkTabview):
         self.winners_list.grid(row=4, column=0, padx=20, pady=10, sticky="sw")
         if len(self.winners) == 0:
             self.winners_list.configure(text=f"Nenhum vencedor!")
+        self.list_all_betnumbers = customtkinter.CTkButton(master=self.tab(self.titles[4]), text="Ver lista de todos os números apostados", command=self.list_apuracao, state="disabled")
+        self.list_all_betnumbers.grid(row=5, column=0, padx=20, pady=10, sticky="sw")
+        self.prize_btn = customtkinter.CTkButton(master=self.tab(self.titles[4]), text="Ver premiação", command=self.goto_prize)
+        self.prize_btn.grid(row=6, column=0, padx=20, pady=10, sticky="sw")
 
         # Premiação
         
@@ -179,13 +202,11 @@ class Tab(customtkinter.CTkTabview):
         
         if self.actual_draw_prize != 0:
             if self.actual_draw_prize.finished:
+                self.list_all_betnumbers.configure(state="normal")
                 self.add_bet.configure(state="disabled")
                 self.surprise_bet.configure(state="disabled")
                 self.remove_a.configure(state="disabled")
                 self.new_a.configure(state="disabled")
-                self.numbers.configure(text="Nenhum número sorteado")
-                self.rounds.configure(text="Nenhuma rodada executada")
-                self.winners_list.configure(text="Vencedores aparecerão aqui depois do fim do sorteio.")
 
 
     def table_window(self):
@@ -320,6 +341,15 @@ class Tab(customtkinter.CTkTabview):
                 Bet.create(user=User.get(User.cpf == self.user_cpf), draw_prize=Draw_Prize.get_by_id(Draw_Prize.select().count()), register_number=self.register_number, first=int(self.n1.get()), second=int(self.n2.get()), third=int(self.n3.get()), fourth=int(self.n4.get()), fifth=int(self.n5.get()))
                 CTkMessagebox(title="Sucesso", icon="check", message="A aposta foi criada com sucesso!")
                 self.register_number = 1000 + Bet.select().where(Bet.draw_prize == self.actual_draw_prize).count()
+                self.actual_bets = Bet.select().where(Bet.draw_prize == self.actual_draw_prize)
+                self.allbets = []
+                for i in self.actual_bets:
+                    self.allbets.append(i.first)
+                    self.allbets.append(i.second)
+                    self.allbets.append(i.third)
+                    self.allbets.append(i.fourth)
+                    self.allbets.append(i.fifth)
+                self.allbets_without_repeat = list(set(self.allbets))
             else:
                 CTkMessagebox(title="Erro", message="Você não pode digitar valores repetidos!!!", icon="cancel") 
 
@@ -345,6 +375,15 @@ class Tab(customtkinter.CTkTabview):
             self.user_cpf = self.user_info[len(self.user_info) - 11 : len(self.user_info)]
             Bet.create(user=User.get(User.cpf == self.user_cpf), draw_prize=Draw_Prize.get_by_id(Draw_Prize.select().count()), register_number=self.register_number, first=self.n1_random, second=self.n2_random, third=self.n3_random, fourth=self.n4_random, fifth=self.n5_random)
             CTkMessagebox(title="Sucesso", icon="check", message="A aposta surpresa foi criada com sucesso!")
+            self.actual_bets = Bet.select().where(Bet.draw_prize == self.actual_draw_prize)
+            self.allbets = []
+            for i in self.actual_bets:
+                self.allbets.append(i.first)
+                self.allbets.append(i.second)
+                self.allbets.append(i.third)
+                self.allbets.append(i.fourth)
+                self.allbets.append(i.fifth)
+            self.allbets_without_repeat = list(set(self.allbets))
 
     def start_draw_prize(self):
         self.exist_bet = False
@@ -399,7 +438,6 @@ class Tab(customtkinter.CTkTabview):
                         Draw_Prize_Winners_Relationship.create(user=j.user, draw_prize=j.draw_prize, register_number=j.register_number)
                         self.actual_draw_prize.has_winner = True
                         self.actual_draw_prize.save()
-            print(list_numbers)
             time.sleep(1)
             self.after_draw_prize()
             self.set("Fim da apuração")
@@ -425,6 +463,7 @@ class Tab(customtkinter.CTkTabview):
         self.surprise_bet.configure(state="disabled")
         self.remove_a.configure(state="disabled")
         self.new_a.configure(state="disabled")
+        self.list_all_betnumbers.configure(state="normal")
         self.numbers.configure(text=f"Números sorteados: {self.actual_draw_prize.numbers}")
         self.rounds.configure(text=f"Rodadas: {self.actual_draw_prize.rounds}")
         self.winners_quant.configure(text=f"Quantidade de vencedores: {len(self.winners)}")
@@ -432,6 +471,26 @@ class Tab(customtkinter.CTkTabview):
             self.winners_list.configure(text=f"Vencedores: {self.winners}")
         else:
             self.winners_list.configure(text=f"Nenhum vencedor!")
+
+    def goto_prize(self):
+        self.set("Premiação")
+        self.configure(state="normal")
+
+    def list_apuracao(self):
+        self.allbets_without_repeat.sort(reverse=True)
+        self.list_ap = customtkinter.CTkToplevel()
+        self.list_ap.resizable(width=False, height=False)
+        self.table_data = [
+                ["Numero apostado", "Quantidade de apostas"]
+        ]
+        for i in self.allbets_without_repeat:
+            data = [i, self.allbets.count(i)]
+            self.table_data.append(data)
+        self.table_frame = customtkinter.CTkScrollableFrame(master=self.list_ap, width=400)
+        self.table_frame.grid(row=0, column=0, padx=20, pady=20)
+        self.table = CTkTable(master=self.table_frame, values=self.table_data)
+        self.table.pack()
+        self.list_ap.attributes("-topmost",True)
     
                 
         
