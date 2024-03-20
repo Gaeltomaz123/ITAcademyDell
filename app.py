@@ -40,17 +40,13 @@ class Tab(customtkinter.CTkTabview):
             self.allbets.append(i.fourth)
             self.allbets.append(i.fifth)
         self.allbets_without_repeat = list(set(self.allbets))
-        '''first 
-        second 
-        third 
-        fourth 
-        fifth '''
 
         
 
         for i in Draw_Prize_Winners_Relationship:
             if i.draw_prize == self.actual_draw_prize:
-                self.winners.append(i.user.name)
+                winner_bet = Bet.get(Bet.register_number == i.register_number)
+                self.winners.append(f"{i.user.name}, {i.register_number}, {winner_bet.first}, {winner_bet.second}, {winner_bet.third}, {winner_bet.fourth}, {winner_bet.fifth}")
         self.winners.sort()
 
         # tabs
@@ -78,7 +74,7 @@ class Tab(customtkinter.CTkTabview):
         self.draw_prize_number_data = Draw_Prize.select().count()
         self.draw_prize_number = customtkinter.CTkLabel(master=self.tab(self.titles[0]), font=self.font_sub, text=f"Sorteio nº: {self.draw_prize_number_data}")
         self.draw_prize_number.grid(row=0, column=1, padx=20, pady=10, sticky="sw")
-        customtkinter.CTkLabel(master=self.tab(self.titles[0]), text="OBS: Você só poderá usar as funções do programa após criar o sorteio").grid(row=1, column=1, padx=20, pady=10, sticky="sw")
+        customtkinter.CTkLabel(master=self.tab(self.titles[0]), text="OBS: Você só poderá usar as funções do programa após criar o sorteio,\ne só poderá criar outro sorteio após a finalização do mesmo").grid(row=1, column=1, padx=20, pady=10, sticky="sw")
         # table button
         self.table_btn = customtkinter.CTkButton(master=self.tab(self.titles[0]), text="Abrir Tabela de Sorteios", command=self.table_window)
         self.table_btn.grid(row=2, column=1, padx=20, pady=10, sticky="sw")
@@ -217,10 +213,11 @@ class Tab(customtkinter.CTkTabview):
         ]
         for i in Draw_Prize.select():
             winners = []
-            for j in Draw_Prize_Winners_Relationship.select():
-                if i.id == j.draw_prize.id:
-                    winners.append(f"[{j.user.name}]")
-            winners.sort()
+            for i in Draw_Prize_Winners_Relationship:
+                if i.draw_prize == self.actual_draw_prize:
+                    winner_bet = Bet.get(Bet.register_number == i.register_number)
+                    self.winners.append(f"{i.user.name}, {i.register_number}, {winner_bet.first}, {winner_bet.second}, {winner_bet.third}, {winner_bet.fourth}, {winner_bet.fifth}")
+            self.winners.sort()
             finished = ""
             if i.finished:
                 finished = "Sim"
@@ -455,10 +452,12 @@ class Tab(customtkinter.CTkTabview):
     def after_draw_prize(self):
         for i in Draw_Prize_Winners_Relationship:
             if i.draw_prize == self.actual_draw_prize:
-                self.winners.append(i.user.name)
+                winner_bet = Bet.get(Bet.register_number == i.register_number)
+                self.winners.append(f"{i.user.name}, {i.register_number}, {winner_bet.first}, {winner_bet.second}, {winner_bet.third}, {winner_bet.fourth}, {winner_bet.fifth}")
         self.winners.sort()
         self.actual_draw_prize.finished = True
         self.actual_draw_prize.save()
+        self.new_d.configure(state="normal")
         self.add_bet.configure(state="disabled")
         self.surprise_bet.configure(state="disabled")
         self.remove_a.configure(state="disabled")
