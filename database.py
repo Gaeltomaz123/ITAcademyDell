@@ -5,16 +5,16 @@ db = SqliteDatabase("theluckygame.db", pragmas={"foreign_keys": 1})
 class User(Model):
     name = CharField(null=False)
     cpf = CharField(unique=True, null=False)
-    wins = IntegerField(default=0)
 
     class Meta:
         database = db
 
 class Draw_Prize(Model):
     rounds = IntegerField(default=0)
-    numbers = CharField(default= "-", null=True)
+    numbers = CharField(default="-", null=True)
     finished = BooleanField(default=False)
     has_winner = BooleanField(default=False)
+    prize = CharField(default="-", null=True)
     class Meta:
         database = db
 
