@@ -41,13 +41,16 @@ class Tab(customtkinter.CTkTabview):
             self.allbets.append(i.fifth)
         self.allbets_without_repeat = list(set(self.allbets))
 
-        
+        self.actual_bet_winners = Draw_Prize_Winners_Relationship.select().where(Draw_Prize_Winners_Relationship.draw_prize == self.actual_draw_prize)
 
-        for i in Draw_Prize_Winners_Relationship:
-            if i.draw_prize == self.actual_draw_prize:
-                winner_bet = Bet.get(Bet.register_number == i.register_number)
-                self.winners.append(f"{i.user.name}, {i.register_number}, {winner_bet.first}, {winner_bet.second}, {winner_bet.third}, {winner_bet.fourth}, {winner_bet.fifth}")
+        for i in self.actual_bet_winners:
+            for j in self.actual_bets:
+                    if i.register_number == j.register_number:
+                        self.winners.append(f"{i.user.name}, Registro da aposta: {i.register_number}, Números: {j.first}, {j.second}, {j.third}, {j.fourth}, {j.fifth}")
         self.winners.sort()
+
+        print(self.winners)
+
 
         # tabs
         self.add("Iniciar")
@@ -171,10 +174,8 @@ class Tab(customtkinter.CTkTabview):
         self.rounds.grid(row=2, column=0, padx=20, pady=10, sticky="sw")
         self.winners_quant = customtkinter.CTkLabel(master=self.tab(self.titles[4]), text=f"Quantidade de vencedores: {len(self.winners)}")
         self.winners_quant.grid(row=3, column=0, padx=20, pady=10, sticky="sw")
-        self.winners_list = customtkinter.CTkLabel(master=self.tab(self.titles[4]), text=f"Vencedores: {self.winners}")
+        self.winners_list = customtkinter.CTkLabel(master=self.tab(self.titles[4]), text=f"Vencedores aparecerão aqui depois do fim do sorteio.")
         self.winners_list.grid(row=4, column=0, padx=20, pady=10, sticky="sw")
-        if len(self.winners) == 0:
-            self.winners_list.configure(text=f"Nenhum vencedor!")
         self.list_all_betnumbers = customtkinter.CTkButton(master=self.tab(self.titles[4]), text="Ver lista de todos os números apostados", command=self.list_apuracao, state="disabled")
         self.list_all_betnumbers.grid(row=5, column=0, padx=20, pady=10, sticky="sw")
         self.prize_btn = customtkinter.CTkButton(master=self.tab(self.titles[4]), text="Ver premiação", command=self.goto_prize)
@@ -194,7 +195,6 @@ class Tab(customtkinter.CTkTabview):
             self.final_text.configure(text="Nenhum sorteio criado!")
             self.numbers.configure(text="Nenhum número sorteado")
             self.rounds.configure(text="Nenhuma rodada executada")
-            self.winners_list.configure(text="Vencedores aparecerão aqui depois do fim do sorteio.")
         
         if self.actual_draw_prize != 0:
             if self.actual_draw_prize.finished:
@@ -213,10 +213,10 @@ class Tab(customtkinter.CTkTabview):
         ]
         for i in Draw_Prize.select():
             winners = []
-            for i in Draw_Prize_Winners_Relationship:
-                if i.draw_prize == self.actual_draw_prize:
-                    winner_bet = Bet.get(Bet.register_number == i.register_number)
-                    self.winners.append(f"{i.user.name}, {i.register_number}, {winner_bet.first}, {winner_bet.second}, {winner_bet.third}, {winner_bet.fourth}, {winner_bet.fifth}")
+            for i in self.actual_bet_winners:
+                for j in self.actual_bets:
+                        if i.register_number == j.register_number:
+                            self.winners.append(f"{i.user.name}")
             self.winners.sort()
             finished = ""
             if i.finished:
@@ -256,6 +256,9 @@ class Tab(customtkinter.CTkTabview):
         CTkMessagebox(title="Sucesso", icon="check", message="Sorteio criado com sucesso!\n\nOBS: Você só poderá criar outro sorteio após a finalização do sorteio atual.")
         self.new_d.configure(state="disabled")
         self.actual_draw_prize = Draw_Prize.get_by_id(Draw_Prize.select().count())
+        self.actual_bet_winners = Draw_Prize_Winners_Relationship.select().where(Draw_Prize_Winners_Relationship.draw_prize == self.actual_draw_prize)
+        self.actual_bets = Bet.select().where(Bet.draw_prize == self.actual_draw_prize)
+        self.winners = []
         self.refresh_things()
 
 
@@ -406,7 +409,7 @@ class Tab(customtkinter.CTkTabview):
                 self.actual_draw_prize.numbers += f", {num}"
                 list_numbers.append(num)
                 self.actual_draw_prize.save()
-                for j in Bet.select():
+                for j in Bet.select().where(Bet.draw_prize == self.actual_draw_prize):
                     if j.first in list_numbers and j.second in list_numbers and j.third in list_numbers and j.fourth in list_numbers and j.fifth in list_numbers:
                         Draw_Prize_Winners_Relationship.create(user=j.user, draw_prize=j.draw_prize, register_number=j.register_number)
                         self.actual_draw_prize.has_winner = True
@@ -442,6 +445,13 @@ class Tab(customtkinter.CTkTabview):
             CTkMessagebox(title="Erro", message="Você deve criar ao menos uma aposta!!!", icon="cancel")
     
     def refresh_things(self):
+        self.winners_quant.configure(text=f"Quantidade de vencedores: {len(self.winners)}")
+        self.list_all_betnumbers.configure(state="disabled")
+        self.round.configure(text="Rodada: 0")
+        self.draw_prize_numbers.configure(text="Números Sorteados: -")
+        self.numbers.configure(text="Nenhum número sorteado")
+        self.rounds.configure(text="Nenhuma rodada executada")
+        self.winners_list.configure(text="Vencedores aparecerão aqui depois do fim do sorteio.")
         self.add_bet.configure(state="normal")
         self.surprise_bet.configure(state="normal")
         self.remove_a.configure(state="normal")
@@ -450,10 +460,10 @@ class Tab(customtkinter.CTkTabview):
         self.final_but.configure(state="normal")
 
     def after_draw_prize(self):
-        for i in Draw_Prize_Winners_Relationship:
-            if i.draw_prize == self.actual_draw_prize:
-                winner_bet = Bet.get(Bet.register_number == i.register_number)
-                self.winners.append(f"{i.user.name}, {i.register_number}, {winner_bet.first}, {winner_bet.second}, {winner_bet.third}, {winner_bet.fourth}, {winner_bet.fifth}")
+        for i in self.actual_bet_winners:
+            for j in self.actual_bets:
+                    if i.register_number == j.register_number:
+                        self.winners.append(f"{i.user.name}, Registro da aposta: {i.register_number}, Números: {j.first}, {j.second}, {j.third}, {j.fourth}, {j.fifth}")
         self.winners.sort()
         self.actual_draw_prize.finished = True
         self.actual_draw_prize.save()
